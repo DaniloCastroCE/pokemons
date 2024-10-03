@@ -1,0 +1,204 @@
+<!--
+    Explicação Geral:
+    O código faz uma requisição à API de Pokémon, obtendo dados dos Pokémons.
+    As funções getApi e getApiMult fazem as requisições para obter os dados da API.
+    O HTML cria uma interface simples que exibe o ID, nome, sprite (imagem) e tipos de cada Pokémon.
+    O estilo aplicado faz com que os Pokémons sejam exibidos em pequenos boxes estilizados, cada um com uma cor de fundo que corresponde ao seu tipo principal.
+    
+-->
+
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name='author' content="Danilo Castro CE">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treino de API</title>
+
+    <!-- Estilos CSS para formatar a exibição dos elementos -->
+    <style rel="stylesheet" type="text/css">
+        .boxPoke {
+            display: inline-block;
+            padding: 5px;
+            margin: 5px;
+            background: rgba(192, 217, 217, 0.8);
+            /* Fundo semitransparente */
+            border-radius: 4px;
+            box-shadow: 2px 2px 5px black;
+            /* Sombra nos boxes */
+            width: 120px;
+        }
+
+        .poke {
+            display: block;
+            text-align: center;
+            /* Centraliza o nome e imagem do Pokémon */
+        }
+
+        .tt {
+            display: flex;
+            justify-content: end;
+            /* Alinha o texto à direita */
+            font-size: 12px;
+        }
+
+        .boxPoke img {
+            display: flex;
+            justify-content: center;
+            /* Centraliza a imagem do Pokémon */
+            align-items: center;
+            margin: 0 auto;
+            cursor: pointer;
+        }
+
+        .boxImgGif {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+    </style>
+
+</head>
+
+<body>
+    <!-- Div onde os boxes dos Pokémons serão inseridos -->
+    <div class="boxImgGif">
+        <div>
+            <span class="tt" id="qtPoke"></span>
+            <img id="imgGif" src="https://gifmania.com.br/wp-content/uploads/2020/01/carregando.gif" alt="carregando">
+        </div>
+    </div>
+    <div id="items"></div>
+    <script type='text/javascript'>
+
+        const qtPoke = 151 // Variavel de controle para inserir a quantidade de pokekom na tela
+
+        // Dicionário de cores baseado nos tipos de Pokémon
+        const cores = {
+            normal: ['#F5DEB3', 'normal'],
+            fighting: ['#FF6347', 'lutador'],
+            flying: ['#87CEFA', 'voador'],
+            poison: ['#DA70D6', 'venenoso'],
+            ground: ['#DEB887', 'terrestre'],
+            rock: ['#D2B48C', 'pedra'],
+            bug: ['#ADFF2F', 'inseto'],
+            ghost: ['#9370DB', 'fantasma'],
+            steel: ['#B0C4DE', 'aço'],
+            fire: ['#FA8072', 'fogo'],
+            water: ['#ADD8E6', 'água'],
+            grass: ['#98FB98', 'grama'],
+            electric: ['#FFD700', 'elétrico'],
+            psychic: ['#FFB6C1', 'psíquico'],
+            ice: ['#E0FFFF', 'gelo'],
+            dragon: ['#B0E0E6', 'dragão'],
+            dark: ['#A9A9A9', 'sombrio'],
+            fairy: ['#FFC0CB', 'fada'],
+            stellar: ['#E6E6FA', 'estelar'],  // Tipo personalizado
+            unknown: ['#D3D3D3', 'desconhecido']
+        };
+
+        // Função para buscar dados de um Pokémon da API
+        async function getApi(url) {
+            await fetch(url)
+                .then(response => response.json()) // Converte a resposta para JSON
+                .then(data => {
+                    // Cria um box para o Pokémon usando os dados obtidos
+                    criarPoke(data, "items");
+                })
+                .catch(err => {
+                    console.log(err); // Tratamento de erro
+                });
+            document.querySelector('.boxImgGif').style.display = 'none'
+        }
+
+        var arrayObj = [];  // Armazena os dados dos Pokémons
+        var urls = [];
+
+        // Preenche a lista de URLs da API dos Pokémons (do 1 ao 1021)
+        for (x = 1; x <= qtPoke; x++) {
+            urls.push(`https://pokeapi.co/api/v2/pokemon/${x}`);
+        }
+
+
+
+        // Função para buscar múltiplos Pokémons de uma vez
+        async function getApiMult(arrayUrl) {
+            const imgGif = document.querySelector('.boxImgGif')
+            document.querySelector('#qtPoke').innerHTML = `Carregando ${qtPoke} pokemons`
+            imgGif.style.display = 'flex'
+
+
+            try {
+                const request = arrayUrl.map(url => fetch(url).then(resp => {
+                    if (!resp) {
+                        throw new Error('Erro ao buscar na URL' + url);
+                    }
+                    return resp.json();  // Converte cada resposta para JSON
+                }));
+
+                const results = await Promise.all(request); // Espera todas as requisições terminarem
+                arrayObj = results;  // Armazena os resultados
+
+            } catch (err) {
+                console.log(err); // Exibe erros
+            } finally {
+                // Itera sobre os resultados e cria os boxes para os Pokémons
+                arrayObj.forEach(item => {
+                    criarPoke(item, "items");
+                });
+                imgGif.style.display = 'none'
+            }
+        }
+
+        // Função que cria o box para cada Pokémon
+        function criarPoke(poke, id) {
+            var textTipo = '';  // Armazena o tipo do Pokémon
+            var cor = '';  // Cor de fundo baseada no tipo do Pokémon
+
+            poke.types.forEach((el, index) => {
+                if (index === 0) {
+                    // Verifica se o tipo do Pokémon existe no dicionário de cores
+                    if (cores.hasOwnProperty(el.type.name)) {
+                        cor = `style='background-color: ${cores[el.type.name][0]};`;
+                    } else {
+                        console.log('Tipo não encontrado');
+                    }
+                }
+                // Concatena os tipos do Pokémon
+                textTipo += `${cores[el.type.name][1]} `;
+                if (poke.types.length !== index + 1) {
+                    textTipo += '/ ';
+                }
+            });
+            // Adiciona o box do Pokémon ao HTML
+            document.querySelector(`#${id}`).innerHTML += `
+                <div class='boxPoke' ${cor}' onclick="voz('${poke.name}')">
+                    <span class='tt'>${poke.id}</span>
+                    <img src='${poke.sprites.front_default}' class='poke'>
+                    <span class='poke'>${poke.name.toUpperCase()}</span>
+                    <span class='tt' style='justify-content: center;'>${textTipo}</span>
+                </div>
+            `;
+        }
+
+        //Função para falar o nome do pokemon
+        function voz(txt) {
+            var mensagem = new SpeechSynthesisUtterance(txt); // Cria um novo objeto de fala
+            mensagem.lang = 'en-US'; // Idioma / en-US pt-BR
+            mensagem.rate = '1'; // Velocidade da fala / 0.5 ate 2
+            mensagem.pitch = '0.9'; // Tom da voz / 0 ate 2
+            //mensagem.voice = speechSynthesis.getVoices()[1] // Mudar a voz
+            window.speechSynthesis.speak(mensagem);
+
+        }
+
+        // Inicia a busca pelos dados dos Pokémons
+        getApiMult(urls);
+        //getApi('https://pokeapi.co/api/v2/pokemon/1');
+    </script>
+</body>
+
+</html>
