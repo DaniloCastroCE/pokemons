@@ -74,8 +74,6 @@
     <div id="items"></div>
     <script type='text/javascript'>
 
-        const qtPoke = 151 // Variavel de controle para inserir a quantidade de pokekom na tela
-
         // Dicionário de cores baseado nos tipos de Pokémon
         const cores = {
             normal: ['#F5DEB3', 'normal'],
@@ -115,24 +113,29 @@
         }
 
         var arrayObj = [];  // Armazena os dados dos Pokémons
-        var urls = [];
 
-        // Preenche a lista de URLs da API dos Pokémons (do 1 ao 1021)
-        for (x = 1; x <= qtPoke; x++) {
-            urls.push(`https://pokeapi.co/api/v2/pokemon/${x}`);
-        }
-
+        const linkUrl = 'https://pokeapi.co/api/v2/pokemon/'
+        const posPoke = { qt: 151, ini: 1, fim: 151, aguardar: false, pokemons: []} // Variavel de controlar a quantidade de pokekom e insirir na tela com rolagem do mouse
 
 
         // Função para buscar múltiplos Pokémons de uma vez
-        async function getApiMult(arrayUrl) {
+        async function getApiMult(url) {
+            var urls = [];
+            posPoke.aguardar = true
+            // Preenche a lista de URLs da API dos Pokémons (do 1 ao 1021)
+            for (x = posPoke.ini; x <= posPoke.fim; x++) {
+                urls.push(`https://pokeapi.co/api/v2/pokemon/${x}`);
+            }
+
             const imgGif = document.querySelector('.boxImgGif')
-            document.querySelector('#qtPoke').innerHTML = `Carregando ${qtPoke} pokemons`
-            imgGif.style.display = 'flex'
+            if (posPoke.ini === 1) {
+                document.querySelector('#qtPoke').innerHTML = `Carregando ${posPoke.qt} pokemons`
+                imgGif.style.display = 'flex'
+            }
 
 
             try {
-                const request = arrayUrl.map(url => fetch(url).then(resp => {
+                const request = urls.map(url => fetch(url).then(resp => {
                     if (!resp) {
                         throw new Error('Erro ao buscar na URL' + url);
                     }
@@ -148,9 +151,43 @@
                 // Itera sobre os resultados e cria os boxes para os Pokémons
                 arrayObj.forEach(item => {
                     criarPoke(item, "items");
+                    posPoke.pokemons.push(item)
                 });
-                imgGif.style.display = 'none'
+
+                if (posPoke.ini === 1) {
+                    imgGif.style.display = 'none'
+                    scrollDaTela()
+                }
+                posPoke.aguardar = false
+                arrayObj = []
+
             }
+        }
+
+        function scrollDaTela() {
+            window.addEventListener('scroll', function () {
+                // Posição atual do scroll vertical
+                let scrollTop = window.scrollY || window.pageYOffset;
+
+                // Altura total do documento
+                let documentHeight = document.documentElement.scrollHeight;
+
+                // Altura visível da janela
+                let windowHeight = window.innerHeight;
+
+                if (!posPoke.aguardar && scrollTop + windowHeight >= documentHeight - 800 && posPoke.pokemons.length <= 1021) {  // margem de 500px antes do final
+                    console.log(`Total de pokemons: ${posPoke.pokemons.length}`)
+                    posPoke.ini = posPoke.pokemons.length+1
+                    posPoke.fim = posPoke.fim + 50
+
+                    if(posPoke.fim > 1021){
+                        posPoke.fim = 1021
+                    }
+
+                    console.log(`Inserindo mais ${posPoke.fim - posPoke.ini} pokemons`)
+                    getApiMult(linkUrl)
+                }
+            })
         }
 
         // Função que cria o box para cada Pokémon
@@ -196,7 +233,7 @@
         }
 
         // Inicia a busca pelos dados dos Pokémons
-        getApiMult(urls);
+        getApiMult(linkUrl);
         //getApi('https://pokeapi.co/api/v2/pokemon/1');
     </script>
 </body>
