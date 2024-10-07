@@ -1,10 +1,9 @@
 <!--
     Explicação Geral:
-    O código faz uma requisição à API de Pokémon, obtendo dados dos Pokémons.
-    As funções getApi e getApiMult fazem as requisições para obter os dados da API.
-    O HTML cria uma interface simples que exibe o ID, nome, sprite (imagem) e tipos de cada Pokémon.
-    O estilo aplicado faz com que os Pokémons sejam exibidos em pequenos boxes estilizados, cada um com uma cor de fundo que corresponde ao seu tipo principal.
-    
+    O código faz requisições à API de Pokémon para obter dados dos Pokémons.
+    As funções getApi e getApiMult são responsáveis por essas requisições.
+    A interface exibe o ID, nome, sprite (imagem) e tipos de cada Pokémon.
+    O estilo organiza os Pokémons em boxes estilizados, com cores de fundo que correspondem ao tipo principal do Pokémon.
 -->
 
 <!DOCTYPE html>
@@ -14,7 +13,8 @@
     <meta charset="UTF-8">
     <meta name='author' content="Danilo Castro CE">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Treino de API</title>
+    <title>Pokemon's</title>
+    <link rel="icon" href="https://e7.pngegg.com/pngimages/906/501/png-clipart-pokeball-pokeball.png" type="image/x-icon">
 
     <!-- Estilos CSS para formatar a exibição dos elementos -->
     <style rel="stylesheet" type="text/css">
@@ -33,7 +33,7 @@
         .poke {
             display: block;
             text-align: center;
-            /* Centraliza o nome e imagem do Pokémon */
+            /* Centraliza o nome e a imagem do Pokémon */
         }
 
         .tt {
@@ -115,7 +115,7 @@
         var arrayObj = [];  // Armazena os dados dos Pokémons
 
         const linkUrl = 'https://pokeapi.co/api/v2/pokemon/'
-        const posPoke = { qt: 151, ini: 1, fim: 151, aguardar: false, pokemons: []} // Variavel de controlar a quantidade de pokekom e insirir na tela com rolagem do mouse
+        const posPoke = { qt: 151, ini: 1, fim: 151, aguardar: false, pokemons: []} // Controla a quantidade de Pokémons exibidos e carrega mais ao rolar a página
 
 
         // Função para buscar múltiplos Pokémons de uma vez
@@ -129,7 +129,7 @@
 
             const imgGif = document.querySelector('.boxImgGif')
             if (posPoke.ini === 1) {
-                document.querySelector('#qtPoke').innerHTML = `Carregando ${posPoke.qt} pokemons`
+                document.querySelector('#qtPoke').innerHTML = `Carregando ${posPoke.qt} pokémons`
                 imgGif.style.display = 'flex'
             }
 
@@ -176,16 +176,17 @@
                 let windowHeight = window.innerHeight;
 
                 if (!posPoke.aguardar && scrollTop + windowHeight >= documentHeight - 800 && posPoke.pokemons.length <= 1021) {  // margem de 500px antes do final
-                    console.log(`Total de pokemons: ${posPoke.pokemons.length}`)
                     posPoke.ini = posPoke.pokemons.length+1
                     posPoke.fim = posPoke.fim + 50
-
                     if(posPoke.fim > 1021){
                         posPoke.fim = 1021
                     }
 
-                    console.log(`Inserindo mais ${posPoke.fim - posPoke.ini} pokemons`)
-                    getApiMult(linkUrl)
+                    if((posPoke.fim - posPoke.ini) !== -1 ){
+                        console.log(`Inserindo mais ${posPoke.fim - posPoke.ini} pokémons`)
+                        getApiMult(linkUrl)
+                    }
+                    console.log(`Total de pokémons na tela: ${posPoke.pokemons.length}`)
                 }
             })
         }
@@ -221,12 +222,12 @@
             `;
         }
 
-        //Função para falar o nome do pokemon
+        // Função para pronunciar o nome do Pokémon
         function voz(txt) {
             var mensagem = new SpeechSynthesisUtterance(txt); // Cria um novo objeto de fala
-            mensagem.lang = 'en-US'; // Idioma / en-US pt-BR
-            mensagem.rate = '1'; // Velocidade da fala / 0.5 ate 2
-            mensagem.pitch = '0.9'; // Tom da voz / 0 ate 2
+            mensagem.lang = 'en-US'; // Idioma (en-US ou pt-BR)
+            mensagem.rate = '1'; // Velocidade da fala (de 0.5 até 2)
+            mensagem.pitch = '0.9'; // Tom da voz (de 0 a 2)
             //mensagem.voice = speechSynthesis.getVoices()[1] // Mudar a voz
             window.speechSynthesis.speak(mensagem);
 
